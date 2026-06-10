@@ -1,4 +1,5 @@
 import { Button } from './components/ui/button'
+import logo from './assets/logo.svg'
 
 function App() {
   return (
@@ -16,7 +17,7 @@ function App() {
         <header className="mx-auto w-full max-w-7xl px-8 py-6">
           <nav className="flex items-center justify-between gap-6">
             <a href="#top" className="flex items-center gap-3 text-3xl tracking-tight text-foreground" style={{ fontFamily: "'Instrument Serif', serif" }}>
-              <img src="/src/assets/logo.png" alt="AnuravtGo logo" width={40} height={40} className="inline-block" />
+              <img src={logo} alt="AnuravtGo logo" width={40} height={40} className="inline-block" />
               <span className="leading-none">AnuravtGo</span>
             </a>
 
@@ -36,11 +37,7 @@ function App() {
             Have the knowledge of a thousand books at your fingertips
           </h1>
 
-          <p className="hero-copy animate-fade-rise-delay mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-            We&apos;re designing tools for deep thinkers, bold creators, and quiet
-            rebels. Amid the chaos, we build digital spaces for sharp focus and
-            inspired work.
-          </p>
+          {/* Hero subtext removed per request */}
 
           <Button
             asChild

@@ -8,7 +8,7 @@ import { getDefaultProgress, loadProgress, saveProgress } from "./storage.js";
  * 2. Paste it between the quotes on the OPENROUTER_API_KEY line.
  * ========================================================================== */
 const OPENROUTER_API_KEY = ""; // <-- paste your OpenRouter key here, e.g. "sk-or-v1-..."
-const OPENROUTER_MODEL = "openrouter/free";
+const OPENROUTER_MODEL = "ibm-granite/granite-4.1-8b";
 
 const TUTOR_SYSTEM_PROMPT = [
   "You are the AnuravtGo Tutor, a warm, patient guide inside a Jainism learning app.",
@@ -230,6 +230,9 @@ const TUTOR_GREETING = "Namaste! I'm your AnuravtGo tutor. Ask me anything about
       return;
     }
 
+    const assistant = { role: "assistant", content: "" };
+    let started = false;
+
     try {
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
@@ -241,18 +244,60 @@ const TUTOR_GREETING = "Namaste! I'm your AnuravtGo tutor. Ask me anything about
         },
         body: JSON.stringify({
           model: OPENROUTER_MODEL,
+          stream: true,
+          max_tokens: 700,
           messages: [{ role: "system", content: TUTOR_SYSTEM_PROMPT }, ...state.chat]
         })
       });
-      if (!response.ok) throw new Error("HTTP " + response.status);
-      const data = await response.json();
-      const reply = (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content || "").trim();
-      state.chat.push({ role: "assistant", content: reply || "Sorry, I couldn’t form a reply just now. Please try again." });
+      if (!response.ok || !response.body) throw new Error("HTTP " + response.status);
+
+      // Stream tokens in as they arrive so replies feel instant.
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith("data:")) continue; // skip blank lines and ': keep-alive' comments
+          const payload = trimmed.slice(5).trim();
+          if (payload === "[DONE]") continue;
+          try {
+            const delta = JSON.parse(payload).choices?.[0]?.delta?.content;
+            if (delta) {
+              if (!started) {
+                started = true;
+                state.chatLoading = false;
+                state.chat.push(assistant);
+              }
+              assistant.content += delta;
+              renderChatLog();
+            }
+          } catch {
+            /* partial JSON across chunks — wait for more */
+          }
+        }
+      }
+
+      if (!started) {
+        state.chatLoading = false;
+        state.chat.push({ role: "assistant", content: "Sorry, I couldn’t form a reply just now. Please try again." });
+      }
     } catch (error) {
-      state.chat.push({
-        role: "assistant",
-        content: "⚠️ I couldn’t reach the tutor service. Check the API key and your connection, then try again."
-      });
+      state.chatLoading = false;
+      if (started) {
+        assistant.content += "\n\n⚠️ (connection interrupted)";
+      } else {
+        state.chat.push({
+          role: "assistant",
+          content: "⚠️ I couldn’t reach the tutor service. Check the API key and your connection, then try again."
+        });
+      }
     } finally {
       state.chatLoading = false;
       renderChatLog();

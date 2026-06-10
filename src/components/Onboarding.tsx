@@ -6,31 +6,53 @@ const SERIF = "'Instrument Serif', serif"
 /* ------------------------------------------------------------------ */
 /* Starfield                                                           */
 /* ------------------------------------------------------------------ */
-function Stars({ count = 90 }: { count?: number }) {
-  const stars = useMemo(
-    () =>
-      Array.from({ length: count }, (_, i) => ({
+function Stars({ count = 220 }: { count?: number }) {
+  const stars = useMemo(() => {
+    return Array.from({ length: count }, (_, i) => {
+      // Weight toward many faint, distant stars with a few bright, close ones.
+      const roll = Math.random()
+      let tier: 'dim' | 'mid' | 'bright'
+      if (roll > 0.93) tier = 'bright'
+      else if (roll > 0.7) tier = 'mid'
+      else tier = 'dim'
+
+      const size =
+        tier === 'bright'
+          ? Math.random() * 1.6 + 2.2
+          : tier === 'mid'
+            ? Math.random() * 1.2 + 1.4
+            : Math.random() * 1 + 0.6
+
+      // Subtle warm/cool tint so they don't read as flat white.
+      const hue = Math.random()
+      const color =
+        hue > 0.8 ? 'rgba(255, 244, 224, 1)' : hue < 0.2 ? 'rgba(214, 233, 255, 1)' : 'rgba(255, 255, 255, 1)'
+
+      return {
         id: i,
+        tier,
         top: Math.random() * 100,
         left: Math.random() * 100,
-        size: Math.random() * 2 + 1,
-        delay: Math.random() * 5,
-        duration: Math.random() * 3 + 2.5,
-      })),
-    [count],
-  )
+        size,
+        color,
+        delay: Math.random() * 6,
+        duration: Math.random() * 3.5 + 2.5,
+      }
+    })
+  }, [count])
 
   return (
     <div className="stars-layer" aria-hidden>
       {stars.map((s) => (
         <span
           key={s.id}
-          className="star"
+          className={`star star--${s.tier}`}
           style={{
             top: `${s.top}%`,
             left: `${s.left}%`,
             width: `${s.size}px`,
             height: `${s.size}px`,
+            ['--star-color' as string]: s.color,
             animationDelay: `${s.delay}s`,
             animationDuration: `${s.duration}s`,
           }}

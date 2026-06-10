@@ -83,6 +83,7 @@ import { getDefaultProgress, loadProgress, saveProgress } from "./storage.js";
     landingNameForm: document.getElementById("landingNameForm"),
     landingNameInput: document.getElementById("landingNameInput"),
     welcomeName: document.getElementById("welcomeName"),
+    brandSubtitle: document.getElementById("brandSubtitle"),
     live: document.getElementById("liveRegion"),
     unitBadge: document.getElementById("unitBadge")
   };
@@ -91,7 +92,7 @@ import { getDefaultProgress, loadProgress, saveProgress } from "./storage.js";
     state.currentLessonId = getFirstAvailableLesson().id;
     bindShell();
     render();
-    setView("home");
+    setView("learn");
   }
 
   function bindShell() {
@@ -168,6 +169,7 @@ import { getDefaultProgress, loadProgress, saveProgress } from "./storage.js";
   function renderProfile() {
     const name = state.progress.profileName;
     els.welcomeName.textContent = name ? `, ${name}` : "";
+    if (els.brandSubtitle) els.brandSubtitle.textContent = name || "Jainism lessons";
   }
 
   function syncLandingName() {

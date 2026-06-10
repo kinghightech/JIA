@@ -190,6 +190,17 @@ a {
   animation: onboarding-in 0.8s ease both;
 }
 
+/* The learning app, opened in-place over the landing (same origin, in-repo). */
+.jainduo-frame {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #fff;
+}
+
 /* ================================================================== */
 /* Onboarding                                                         */
 /* ================================================================== */

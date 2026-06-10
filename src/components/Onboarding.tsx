@@ -121,7 +121,7 @@ function Typewriter({
 /* ------------------------------------------------------------------ */
 type Step = 'intro' | 'name' | 'done'
 
-export default function Onboarding() {
+export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   const [step, setStep] = useState<Step>('intro')
   const [introReady, setIntroReady] = useState(false)
   const [name, setName] = useState('')
@@ -143,8 +143,8 @@ export default function Onboarding() {
 
   const displayName = name.trim()
 
-  // Hand the name to the Jainduo app (same origin → shared localStorage),
-  // then redirect into it after the thank-you message has been read.
+  // Hand the name to the learning app (same origin → shared localStorage),
+  // then open it in-place once the thank-you message has been read.
   function enterJainduo() {
     try {
       const KEY = 'jinaPath.progress.v1'
@@ -153,9 +153,7 @@ export default function Onboarding() {
     } catch {
       /* localStorage unavailable — proceed without seeding the name */
     }
-    window.setTimeout(() => {
-      window.location.href = '/jainduo/index.html'
-    }, 1600)
+    window.setTimeout(onComplete, 1600)
   }
 
   return (

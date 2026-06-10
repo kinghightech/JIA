@@ -5,8 +5,8 @@ import logo from './assets/logo.png'
 
 function App() {
   const headerRef = useRef<HTMLDivElement | null>(null)
-  // 'landing' → 'leaving' (fade out) → 'onboarding'
-  const [phase, setPhase] = useState<'landing' | 'leaving' | 'onboarding'>('landing')
+  // 'landing' → 'leaving' (fade out) → 'onboarding' → 'jainduo' (learning app)
+  const [phase, setPhase] = useState<'landing' | 'leaving' | 'onboarding' | 'jainduo'>('landing')
 
   useEffect(() => {
     function setHeaderVar() {
@@ -69,8 +69,16 @@ function App() {
 
       {phase === 'onboarding' && (
         <div className="onboarding-enter absolute inset-0 z-30">
-          <Onboarding />
+          <Onboarding onComplete={() => setPhase('jainduo')} />
         </div>
+      )}
+
+      {phase === 'jainduo' && (
+        <iframe
+          title="AnuravtGo"
+          src="/jainduo/index.html"
+          className="jainduo-frame onboarding-enter"
+        />
       )}
     </main>
   )

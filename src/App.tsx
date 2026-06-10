@@ -25,6 +25,16 @@ function App() {
     window.setTimeout(() => setPhase('onboarding'), 700)
   }
 
+  // Demo reset: wipe all saved progress and return to the landing page.
+  function restartDemo() {
+    try {
+      localStorage.clear()
+    } catch {
+      /* ignore */
+    }
+    window.location.reload()
+  }
+
   return (
     <main id="top" className="relative min-h-screen overflow-hidden bg-background text-foreground">
       <video
@@ -80,6 +90,17 @@ function App() {
           className="jainduo-frame onboarding-enter"
         />
       )}
+
+      {/* Demo control: always on top, resets everything back to the landing page */}
+      <button
+        type="button"
+        onClick={restartDemo}
+        className="restart-demo"
+        title="Restart demo from the landing page"
+        aria-label="Restart demo"
+      >
+        <span aria-hidden="true">⟲</span> Restart demo
+      </button>
     </main>
   )
 }

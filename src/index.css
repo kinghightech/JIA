@@ -190,6 +190,43 @@ a {
   animation: onboarding-in 0.8s ease both;
 }
 
+/* Demo reset button — fixed, always above every phase (landing/onboarding/app). */
+.restart-demo {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 70;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  background: rgba(1, 26, 43, 0.72);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  opacity: 0.7;
+  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+
+.restart-demo:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+  background: rgba(1, 26, 43, 0.92);
+}
+
+.restart-demo span {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
 /* The learning app, opened in-place over the landing (same origin, in-repo). */
 .jainduo-frame {
   position: fixed;

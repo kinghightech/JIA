@@ -21,6 +21,7 @@
 
         <nav class="main-nav" aria-label="Primary">
           <button class="nav-item is-active" data-view="learn" type="button"><span aria-hidden="true">◇</span><strong>Learn</strong></button>
+          <button class="nav-item" data-view="tutor" type="button"><span aria-hidden="true">✦</span><strong>Tutor</strong></button>
           <button class="nav-item" data-view="review" type="button"><span aria-hidden="true">?</span><strong>Review</strong></button>
           <button class="nav-item" data-view="library" type="button"><span aria-hidden="true">□</span><strong>Library</strong></button>
           <button class="nav-item" data-view="progress" type="button"><span aria-hidden="true">○</span><strong>Progress</strong></button>
@@ -156,6 +157,21 @@
             </div>
           </div>
           <div id="progressRoot" class="progress-grid"></div>
+        </section>
+
+        <section class="content-panel chat-panel" data-panel="tutor" hidden>
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Ask</p>
+              <h2>Your Jain studies tutor</h2>
+            </div>
+          </div>
+          <div id="chatLog" class="chat-log" aria-live="polite"></div>
+          <form id="chatForm" class="chat-form">
+            <label class="sr-only" for="chatInput">Ask a question about Jainism</label>
+            <input id="chatInput" class="chat-input" type="text" placeholder="Ask about ahimsa, karma, the Tirthankaras…" autocomplete="off" />
+            <button class="primary-btn" type="submit" id="chatSend">Send</button>
+          </form>
         </section>
       </main>
     </div>

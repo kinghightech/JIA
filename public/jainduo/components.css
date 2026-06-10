@@ -537,7 +537,7 @@
   }
 
   .main-nav {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     margin: 18px 0;
   }
 
@@ -588,7 +588,7 @@
   }
 
   .main-nav {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 6px;
     margin: 0;
   }
@@ -640,7 +640,7 @@
   }
 
   .main-nav {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 
   .reward-grid {
@@ -901,4 +901,101 @@ button.stair-card:disabled {
   .stair {
     margin-left: calc(var(--stair, 0) * 16px);
   }
+}
+
+/* ================================================================== */
+/* AI tutor chat                                                      */
+/* ================================================================== */
+.chat-panel {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 16px;
+  min-height: 62vh;
+}
+
+.chat-log {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  overflow-y: auto;
+  max-height: 58vh;
+  padding: 4px;
+}
+
+.chat-msg {
+  display: flex;
+}
+
+.chat-msg.is-user {
+  justify-content: flex-end;
+}
+
+.chat-bubble {
+  max-width: 82%;
+  padding: 12px 15px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  line-height: 1.55;
+}
+
+.chat-msg.is-bot .chat-bubble {
+  background: var(--surface-2);
+  color: var(--ink);
+  border-bottom-left-radius: 4px;
+}
+
+.chat-msg.is-user .chat-bubble {
+  background: var(--teal);
+  color: #fff;
+  border-color: var(--teal-dark);
+  border-bottom-right-radius: 4px;
+}
+
+.chat-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.chat-input {
+  min-width: 0;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--ink);
+}
+
+.chat-input:focus {
+  outline: none;
+  border-color: var(--teal);
+}
+
+.chat-typing {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.chat-typing span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+  animation: chat-blink 1s infinite ease-in-out;
+}
+
+.chat-typing span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.chat-typing span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes chat-blink {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
 }

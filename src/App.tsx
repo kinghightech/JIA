@@ -1,13 +1,5 @@
 import { Button } from './components/ui/button'
 
-const navLinks = [
-  { label: 'Home', href: '#top', active: true },
-  { label: 'Studio', href: '#studio' },
-  { label: 'About', href: '#about' },
-  { label: 'Journal', href: '#journal' },
-  { label: 'Reach Us', href: '#reach-us' },
-]
-
 function App() {
   return (
     <main id="top" className="relative min-h-screen overflow-hidden bg-background text-foreground">
@@ -23,37 +15,16 @@ function App() {
       <div className="relative z-10 flex min-h-screen flex-col">
         <header className="mx-auto w-full max-w-7xl px-8 py-6">
           <nav className="flex items-center justify-between gap-6">
-            <a
-              href="#top"
-              className="text-3xl tracking-tight text-foreground"
-              style={{ fontFamily: "'Instrument Serif', serif" }}
-            >
-              Velorah<sup className="text-xs">&reg;</sup>
+            <a href="#top" className="flex items-center gap-3 text-3xl tracking-tight text-foreground" style={{ fontFamily: "'Instrument Serif', serif" }}>
+              <img src="/src/assets/logo.svg" alt="AnuravtGo logo" width={40} height={40} className="inline-block" />
+              <span className="leading-none">AnuravtGo</span>
             </a>
 
-            <div className="hidden items-center gap-8 md:flex">
-              {navLinks.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  className={[
-                    'text-sm transition-colors',
-                    link.active
-                      ? 'text-foreground'
-                      : 'text-muted-foreground hover:text-foreground',
-                  ].join(' ')}
-                >
-                  {link.label}
-                </a>
-              ))}
+            <div className="flex items-center">
+              <Button asChild className="liquid-glass rounded-full px-6 py-2.5 text-sm text-foreground hover:scale-[1.03]">
+                <a href="#reach-us">Begin Journey</a>
+              </Button>
             </div>
-
-            <Button
-              asChild
-              className="liquid-glass rounded-full px-6 py-2.5 text-sm text-foreground hover:scale-[1.03]"
-            >
-              <a href="#reach-us">Begin Journey</a>
-            </Button>
           </nav>
         </header>
 

@@ -14,13 +14,15 @@ function App() {
       />
 
       <div className="relative z-10 flex min-h-screen flex-col">
-        <header className="mx-auto w-full max-w-7xl px-8 py-6">
-          <nav className="flex items-center justify-between gap-6">
-            <a href="#top" className="flex items-center gap-3 text-3xl tracking-tight text-foreground" style={{ fontFamily: "'Instrument Serif', serif" }}>
-              <img src={logo} alt="AnuravtGo logo" width={40} height={40} className="inline-block" />
-              <span className="leading-none">AnuravtGo</span>
-            </a>
-          </nav>
+        <header className="absolute left-0 right-0 top-0 z-20">
+          <div className="mx-auto w-full max-w-7xl px-8 py-6">
+            <nav className="flex items-center justify-between gap-6">
+              <a href="#top" className="flex items-center gap-3 text-3xl tracking-tight text-foreground" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                <img src={logo} alt="AnuravtGo logo" width={40} height={40} className="inline-block" />
+                <span className="leading-none">AnuravtGo</span>
+              </a>
+            </nav>
+          </div>
         </header>
 
         <section className="hero-stage flex flex-1 flex-col items-center justify-center px-6 py-12 text-center">
@@ -28,7 +30,7 @@ function App() {
             className="hero-heading animate-fade-rise max-w-7xl text-5xl font-normal leading-[0.95] tracking-[-2.46px] sm:text-7xl md:text-8xl"
             style={{ fontFamily: "'Instrument Serif', serif" }}
           >
-            Have the knowledge of <span className="highlight-thousand">a thousand</span> books at your fingertips
+            Have the knowledge of a <span className="highlight-thousand">thousand</span> books at your fingertips
           </h1>
 
           {/* Hero subtext removed per request */}

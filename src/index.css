@@ -122,17 +122,18 @@ a {
 .highlight-thousand {
   color: #ffd166;
   display: inline-block;
-  font-weight: 700;
-  font-size: 1.06em;
+  font-weight: 800;
+  font-size: 1.15em;
   transform-origin: left center;
+  line-height: 0.9;
 }
 
 @media (min-width: 640px) {
-  .highlight-thousand { font-size: 1.12em; }
+  .highlight-thousand { font-size: 1.3em; }
 }
 
 @media (min-width: 768px) {
-  .highlight-thousand { font-size: 1.18em; }
+  .highlight-thousand { font-size: 1.5em; }
 }
 
 @media (max-height: 820px) {

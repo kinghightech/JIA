@@ -149,7 +149,7 @@ a {
 
 /* Center hero vertically under the absolute header (header height ~ 96px) */
 .hero-stage {
-  min-height: calc(100vh - 96px);
+  min-height: calc(100vh - var(--header-h, 96px));
   padding-top: 0;
   padding-bottom: 0;
   display: flex;

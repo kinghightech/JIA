@@ -1,7 +1,21 @@
+import React, { useEffect, useRef } from 'react'
 import { Button } from './components/ui/button'
 import logo from './assets/logo.png'
 
 function App() {
+  const headerRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    function setHeaderVar() {
+      const h = headerRef.current?.offsetHeight ?? 96
+      document.documentElement.style.setProperty('--header-h', `${h}px`)
+    }
+
+    setHeaderVar()
+    window.addEventListener('resize', setHeaderVar)
+    return () => window.removeEventListener('resize', setHeaderVar)
+  }, [])
+
   return (
     <main id="top" className="relative min-h-screen overflow-hidden bg-background text-foreground">
       <video
@@ -15,7 +29,7 @@ function App() {
 
       <div className="relative z-10 flex min-h-screen flex-col">
         <header className="absolute left-0 right-0 top-0 z-20">
-          <div className="mx-auto w-full max-w-7xl px-8 py-6">
+          <div ref={headerRef} className="mx-auto w-full max-w-7xl px-8 py-6">
             <nav className="flex items-center justify-between gap-6">
               <a href="#top" className="flex items-center gap-3 text-3xl tracking-tight text-foreground" style={{ fontFamily: "'Instrument Serif', serif" }}>
                 <img src={logo} alt="AnuravtGo logo" width={40} height={40} className="inline-block" />

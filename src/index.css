@@ -122,18 +122,9 @@ a {
 .highlight-thousand {
   color: #ffd166;
   display: inline-block;
-  font-weight: 800;
-  font-size: 1.15em;
+  font-weight: 700;
+  font-size: inherit;
   transform-origin: left center;
-  line-height: 0.9;
-}
-
-@media (min-width: 640px) {
-  .highlight-thousand { font-size: 1.3em; }
-}
-
-@media (min-width: 768px) {
-  .highlight-thousand { font-size: 1.5em; }
 }
 
 @media (max-height: 820px) {
@@ -155,3 +146,15 @@ a {
     margin-top: 1.5rem;
   }
 }
+
+/* Center hero vertically under the absolute header (header height ~ 96px) */
+.hero-stage {
+  min-height: calc(100vh - 96px);
+  padding-top: 0;
+  padding-bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-heading { margin: 0; }

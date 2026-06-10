@@ -1,5 +1,5 @@
 import { Button } from './components/ui/button'
-import logo from './assets/logo.svg'
+import logo from './assets/logo.png'
 
 function App() {
   return (
@@ -20,21 +20,15 @@ function App() {
               <img src={logo} alt="AnuravtGo logo" width={40} height={40} className="inline-block" />
               <span className="leading-none">AnuravtGo</span>
             </a>
-
-            <div className="flex items-center">
-              <Button asChild className="liquid-glass rounded-full px-6 py-2.5 text-sm text-foreground hover:scale-[1.03]">
-                <a href="#reach-us">Begin Journey</a>
-              </Button>
-            </div>
           </nav>
         </header>
 
-        <section className="hero-stage flex flex-1 flex-col items-center justify-start px-6 pt-8 text-center sm:pt-12 md:pt-16">
+        <section className="hero-stage flex flex-1 flex-col items-center justify-center px-6 py-12 text-center">
           <h1
             className="hero-heading animate-fade-rise max-w-7xl text-5xl font-normal leading-[0.95] tracking-[-2.46px] sm:text-7xl md:text-8xl"
             style={{ fontFamily: "'Instrument Serif', serif" }}
           >
-            Have the knowledge of a thousand books at your fingertips
+            Have the knowledge of <span className="highlight-thousand">a thousand</span> books at your fingertips
           </h1>
 
           {/* Hero subtext removed per request */}

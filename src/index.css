@@ -119,6 +119,22 @@ a {
   color: hsl(var(--foreground));
 }
 
+.highlight-thousand {
+  color: #ffd166;
+  display: inline-block;
+  font-weight: 700;
+  font-size: 1.06em;
+  transform-origin: left center;
+}
+
+@media (min-width: 640px) {
+  .highlight-thousand { font-size: 1.12em; }
+}
+
+@media (min-width: 768px) {
+  .highlight-thousand { font-size: 1.18em; }
+}
+
 @media (max-height: 820px) {
   .hero-stage {
     justify-content: flex-start;

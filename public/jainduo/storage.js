@@ -4,6 +4,7 @@ export function getDefaultProgress(lessons) {
   return {
     version: 1,
     profileName: "",
+    onboarded: false,
     xp: 0,
     coins: 0,
     streak: 0,
@@ -30,6 +31,7 @@ export function loadProgress(lessons) {
       ...defaults,
       ...parsed,
       profileName: typeof parsed.profileName === "string" ? parsed.profileName : "",
+      onboarded: typeof parsed.onboarded === "boolean" ? parsed.onboarded : false,
       xp: Number.isFinite(parsed.xp) ? parsed.xp : defaults.xp,
       coins: Number.isFinite(parsed.coins) ? parsed.coins : defaults.coins,
       streak: Number.isFinite(parsed.streak) ? parsed.streak : defaults.streak,

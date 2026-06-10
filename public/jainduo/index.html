@@ -103,18 +103,26 @@
         </section>
 
         <section class="course-layout" data-panel="learn" hidden>
-          <div class="path-panel">
+          <div class="path-backdrop" id="pathBackdrop" hidden></div>
+          <aside class="path-panel" id="pathPanel" aria-label="Course path">
             <div class="panel-heading">
               <div>
                 <p class="eyebrow">Course path</p>
-                <h2>From first concepts to synthesis</h2>
+                <h2>All levels</h2>
               </div>
-              <span class="badge" id="unitBadge">Unit 1</span>
+              <button class="small-btn" id="pathCloseButton" type="button">Close</button>
             </div>
             <div id="coursePath" class="course-path" aria-label="Lesson path"></div>
-          </div>
+          </aside>
 
           <section class="lesson-panel" aria-label="Lesson activity">
+            <div class="learn-topbar">
+              <button class="small-btn path-toggle" id="pathToggle" type="button" aria-expanded="false">
+                <span aria-hidden="true">☰</span> Levels
+              </button>
+              <span class="badge" id="unitBadge">Unit 1</span>
+            </div>
+            <div id="guideRoot"></div>
             <div id="lessonRoot"></div>
             <p class="sr-only" id="liveRegion" aria-live="polite"></p>
           </section>

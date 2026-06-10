@@ -24,33 +24,63 @@ const rewards = [
 ];
 
 export function renderReviewView(ctx) {
-  const weak = ctx.getLessons()
-    .filter((lesson) => ctx.isLessonUnlocked(lesson.id) && !ctx.state.progress.completedLessons.includes(lesson.id))
+  const lessons = ctx.getLessons();
+  const results = ctx.state.progress.results;
+  const completedIds = ctx.state.progress.completedLessons;
+
+  // Real weak areas come from lessons the learner actually practiced and missed,
+  // not from lessons they have not started yet.
+  const weakAreas = lessons
+    .map((lesson) => {
+      const record = results[lesson.id];
+      if (!record || !record.attempts) return null;
+      const accuracy = Math.round((record.correct / record.attempts) * 100);
+      return { lesson, accuracy, misses: Math.max(0, record.attempts - record.correct) };
+    })
+    .filter((item) => item && item.misses > 0)
+    .sort((a, b) => a.accuracy - b.accuracy)
     .slice(0, 3);
-  const completedLessons = ctx.getLessons().filter((lesson) => ctx.state.progress.completedLessons.includes(lesson.id));
-  const current = ctx.getFirstAvailableLesson();
-  ctx.els.review.innerHTML = `
-    <article class="info-card lesson-summary-card">
-      <p class="eyebrow">Teach again</p>
-      <h3>${current.title}</h3>
-      <p>${current.teaching[0].body}</p>
-      <button class="small-btn" type="button" data-review="${current.id}">Review lesson</button>
-    </article>
+
+  const learned = lessons
+    .filter((lesson) => completedIds.includes(lesson.id))
+    .slice(-4)
+    .reverse();
+
+  const weakHtml = weakAreas.length
+    ? weakAreas.map(({ lesson, accuracy, misses }) => `
+        <article class="info-card weak-card">
+          <div class="weak-card-top">
+            <p class="eyebrow">Strengthen</p>
+            <span class="accuracy-pill">${accuracy}% correct</span>
+          </div>
+          <h3>${lesson.title}</h3>
+          <p>${lesson.summary}</p>
+          <button class="small-btn" type="button" data-review="${lesson.id}">Practice ${misses} missed idea${misses === 1 ? "" : "s"}</button>
+        </article>
+      `).join("")
+    : `
+        <article class="info-card review-empty">
+          <div class="review-empty-mark" aria-hidden="true">&#10003;</div>
+          <div>
+            <p class="eyebrow">All clear</p>
+            <h3>Nothing to repair yet</h3>
+            <p>Answer practice questions inside a lesson. Any idea you miss is gathered here so you can strengthen it later.</p>
+          </div>
+          <button class="small-btn" type="button" data-review="${ctx.getFirstAvailableLesson().id}">Start a lesson</button>
+        </article>
+      `;
+
+  const learnedHtml = learned.map((lesson) => `
     <article class="info-card">
-      <p class="eyebrow">Weak area</p>
-      <h3>${weak[0]?.concept || "Start learning"}</h3>
-      <p>${weak[0] ? weak[0].objectives.join(" ") : "Complete a lesson to build a review queue."}</p>
-      <button class="small-btn" type="button" ${weak[0] ? "" : "disabled"} data-review="${weak[0]?.id || ""}">Practice</button>
+      <p class="eyebrow">Learned concept</p>
+      <h3>${lesson.concept}</h3>
+      <p>${lesson.teaching.map((card) => card.term).join(", ")}</p>
+      <button class="small-btn" type="button" data-review="${lesson.id}">Relearn</button>
     </article>
-    ${completedLessons.slice(-4).reverse().map((lesson) => `
-      <article class="info-card">
-        <p class="eyebrow">Learned concept</p>
-        <h3>${lesson.concept}</h3>
-        <p>${lesson.teaching.map((card) => card.term).join(", ")}</p>
-        <button class="small-btn" type="button" data-review="${lesson.id}">Relearn</button>
-      </article>
-    `).join("")}
-  `;
+  `).join("");
+
+  ctx.els.review.innerHTML = weakHtml + learnedHtml;
+
   ctx.els.review.querySelectorAll("[data-review]").forEach((button) => {
     button.addEventListener("click", () => {
       ctx.setView("learn");
@@ -72,7 +102,27 @@ export function renderLibraryView(ctx) {
   `).join("");
 }
 
+function ensureProgressStars(ctx) {
+  const panel = ctx.els.progress.closest(".content-panel");
+  if (!panel || panel.querySelector(".progress-stars")) return;
+  const layer = document.createElement("div");
+  layer.className = "progress-stars";
+  layer.setAttribute("aria-hidden", "true");
+  let dots = "";
+  for (let i = 0; i < 120; i += 1) {
+    const top = (Math.random() * 100).toFixed(2);
+    const left = (Math.random() * 100).toFixed(2);
+    const size = (Math.random() * 2 + 1).toFixed(2);
+    const delay = (Math.random() * 6).toFixed(2);
+    const duration = (Math.random() * 3.5 + 2.5).toFixed(2);
+    dots += `<span class="p-star" style="top:${top}%;left:${left}%;width:${size}px;height:${size}px;animation-delay:${delay}s;animation-duration:${duration}s"></span>`;
+  }
+  layer.innerHTML = dots;
+  panel.insertBefore(layer, panel.firstChild);
+}
+
 export function renderProgressView(ctx) {
+  ensureProgressStars(ctx);
   const lessons = ctx.getLessons();
   const complete = ctx.state.progress.completedLessons.length;
   const percent = Math.round((complete / lessons.length) * 100);

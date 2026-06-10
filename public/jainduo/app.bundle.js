@@ -5,6 +5,7 @@ function getDefaultProgress(lessons) {
   return {
     version: 1,
     profileName: "",
+    onboarded: false,
     xp: 0,
     coins: 0,
     streak: 0,
@@ -31,6 +32,7 @@ function loadProgress(lessons) {
       ...defaults,
       ...parsed,
       profileName: typeof parsed.profileName === "string" ? parsed.profileName : "",
+      onboarded: typeof parsed.onboarded === "boolean" ? parsed.onboarded : false,
       xp: Number.isFinite(parsed.xp) ? parsed.xp : defaults.xp,
       coins: Number.isFinite(parsed.coins) ? parsed.coins : defaults.coins,
       streak: Number.isFinite(parsed.streak) ? parsed.streak : defaults.streak,
@@ -1466,33 +1468,63 @@ const rewards = [
 ];
 
 function renderReviewView(ctx) {
-  const weak = ctx.getLessons()
-    .filter((lesson) => ctx.isLessonUnlocked(lesson.id) && !ctx.state.progress.completedLessons.includes(lesson.id))
+  const lessons = ctx.getLessons();
+  const results = ctx.state.progress.results;
+  const completedIds = ctx.state.progress.completedLessons;
+
+  // Real weak areas come from lessons the learner actually practiced and missed,
+  // not from lessons they have not started yet.
+  const weakAreas = lessons
+    .map((lesson) => {
+      const record = results[lesson.id];
+      if (!record || !record.attempts) return null;
+      const accuracy = Math.round((record.correct / record.attempts) * 100);
+      return { lesson, accuracy, misses: Math.max(0, record.attempts - record.correct) };
+    })
+    .filter((item) => item && item.misses > 0)
+    .sort((a, b) => a.accuracy - b.accuracy)
     .slice(0, 3);
-  const completedLessons = ctx.getLessons().filter((lesson) => ctx.state.progress.completedLessons.includes(lesson.id));
-  const current = ctx.getFirstAvailableLesson();
-  ctx.els.review.innerHTML = `
-    <article class="info-card lesson-summary-card">
-      <p class="eyebrow">Teach again</p>
-      <h3>${current.title}</h3>
-      <p>${current.teaching[0].body}</p>
-      <button class="small-btn" type="button" data-review="${current.id}">Review lesson</button>
-    </article>
+
+  const learned = lessons
+    .filter((lesson) => completedIds.includes(lesson.id))
+    .slice(-4)
+    .reverse();
+
+  const weakHtml = weakAreas.length
+    ? weakAreas.map(({ lesson, accuracy, misses }) => `
+        <article class="info-card weak-card">
+          <div class="weak-card-top">
+            <p class="eyebrow">Strengthen</p>
+            <span class="accuracy-pill">${accuracy}% correct</span>
+          </div>
+          <h3>${lesson.title}</h3>
+          <p>${lesson.summary}</p>
+          <button class="small-btn" type="button" data-review="${lesson.id}">Practice ${misses} missed idea${misses === 1 ? "" : "s"}</button>
+        </article>
+      `).join("")
+    : `
+        <article class="info-card review-empty">
+          <div class="review-empty-mark" aria-hidden="true">&#10003;</div>
+          <div>
+            <p class="eyebrow">All clear</p>
+            <h3>Nothing to repair yet</h3>
+            <p>Answer practice questions inside a lesson. Any idea you miss is gathered here so you can strengthen it later.</p>
+          </div>
+          <button class="small-btn" type="button" data-review="${ctx.getFirstAvailableLesson().id}">Start a lesson</button>
+        </article>
+      `;
+
+  const learnedHtml = learned.map((lesson) => `
     <article class="info-card">
-      <p class="eyebrow">Weak area</p>
-      <h3>${weak[0]?.concept || "Start learning"}</h3>
-      <p>${weak[0] ? weak[0].objectives.join(" ") : "Complete a lesson to build a review queue."}</p>
-      <button class="small-btn" type="button" ${weak[0] ? "" : "disabled"} data-review="${weak[0]?.id || ""}">Practice</button>
+      <p class="eyebrow">Learned concept</p>
+      <h3>${lesson.concept}</h3>
+      <p>${lesson.teaching.map((card) => card.term).join(", ")}</p>
+      <button class="small-btn" type="button" data-review="${lesson.id}">Relearn</button>
     </article>
-    ${completedLessons.slice(-4).reverse().map((lesson) => `
-      <article class="info-card">
-        <p class="eyebrow">Learned concept</p>
-        <h3>${lesson.concept}</h3>
-        <p>${lesson.teaching.map((card) => card.term).join(", ")}</p>
-        <button class="small-btn" type="button" data-review="${lesson.id}">Relearn</button>
-      </article>
-    `).join("")}
-  `;
+  `).join("");
+
+  ctx.els.review.innerHTML = weakHtml + learnedHtml;
+
   ctx.els.review.querySelectorAll("[data-review]").forEach((button) => {
     button.addEventListener("click", () => {
       ctx.setView("learn");
@@ -1514,7 +1546,27 @@ function renderLibraryView(ctx) {
   `).join("");
 }
 
+function ensureProgressStars(ctx) {
+  const panel = ctx.els.progress.closest(".content-panel");
+  if (!panel || panel.querySelector(".progress-stars")) return;
+  const layer = document.createElement("div");
+  layer.className = "progress-stars";
+  layer.setAttribute("aria-hidden", "true");
+  let dots = "";
+  for (let i = 0; i < 120; i += 1) {
+    const top = (Math.random() * 100).toFixed(2);
+    const left = (Math.random() * 100).toFixed(2);
+    const size = (Math.random() * 2 + 1).toFixed(2);
+    const delay = (Math.random() * 6).toFixed(2);
+    const duration = (Math.random() * 3.5 + 2.5).toFixed(2);
+    dots += `<span class="p-star" style="top:${top}%;left:${left}%;width:${size}px;height:${size}px;animation-delay:${delay}s;animation-duration:${duration}s"></span>`;
+  }
+  layer.innerHTML = dots;
+  panel.insertBefore(layer, panel.firstChild);
+}
+
 function renderProgressView(ctx) {
+  ensureProgressStars(ctx);
   const lessons = ctx.getLessons();
   const complete = ctx.state.progress.completedLessons.length;
   const percent = Math.round((complete / lessons.length) * 100);
@@ -1685,11 +1737,18 @@ function escapeAttr(value) {
     selectedSet: new Set(),
     matched: {},
     ordered: [],
-    lastCompletionReward: null
+    lastCompletionReward: null,
+    guideLessonActive: false,
+    guideRead: new Set()
   };
 
   const els = {
     path: document.getElementById("coursePath"),
+    guide: document.getElementById("guideRoot"),
+    pathPanel: document.getElementById("pathPanel"),
+    pathBackdrop: document.getElementById("pathBackdrop"),
+    pathToggle: document.getElementById("pathToggle"),
+    pathClose: document.getElementById("pathCloseButton"),
     lesson: document.getElementById("lessonRoot"),
     review: document.getElementById("reviewRoot"),
     library: document.getElementById("libraryRoot"),
@@ -1734,6 +1793,9 @@ function escapeAttr(value) {
       saveLandingName();
       renderProgressView(getDashboardContext());
     });
+    if (els.pathToggle) els.pathToggle.addEventListener("click", () => setPathOpen(!document.body.classList.contains("path-open")));
+    if (els.pathClose) els.pathClose.addEventListener("click", () => setPathOpen(false));
+    if (els.pathBackdrop) els.pathBackdrop.addEventListener("click", () => setPathOpen(false));
     els.reset.addEventListener("click", () => {
       if (confirm("Reset all local progress for AnuravtGo?")) {
         state.progress = getDefaultProgress(getLessons());
@@ -1742,13 +1804,27 @@ function escapeAttr(value) {
         state.phase = "teach";
         state.teachingIndex = 0;
         state.exerciseIndex = 0;
+        state.guideLessonActive = false;
+        state.guideRead = new Set();
+        setView("learn");
         render();
       }
     });
   }
 
+  function setPathOpen(open) {
+    document.body.classList.toggle("path-open", open);
+    if (els.pathToggle) els.pathToggle.setAttribute("aria-expanded", String(open));
+    if (els.pathBackdrop) els.pathBackdrop.hidden = !open;
+  }
+
+  function shouldShowGuide() {
+    return !state.progress.onboarded && !state.guideLessonActive;
+  }
+
   function setView(view) {
     document.body.classList.toggle("is-home", view === "home");
+    if (view !== "learn") setPathOpen(false);
     document.querySelectorAll("[data-panel]").forEach((panel) => {
       panel.hidden = panel.dataset.panel !== view;
     });
@@ -1832,7 +1908,7 @@ function escapeAttr(value) {
           <span>${lesson.level} - ${lesson.summary}</span>
         </span>
       `;
-      button.addEventListener("click", () => startLesson(lesson.id));
+      button.addEventListener("click", () => { setPathOpen(false); startLesson(lesson.id); });
       els.path.appendChild(button);
     });
     const currentUnit = course.findIndex((unit) => unit.lessons.some((lesson) => lesson.id === state.currentLessonId)) + 1;
@@ -1868,7 +1944,108 @@ function escapeAttr(value) {
     });
   }
 
+  function renderGuide(root) {
+    const firstLesson = getLessons()[0];
+    const step1Done = state.progress.completedLessons.includes(firstLesson.id);
+    if (!state.guideRead) state.guideRead = new Set();
+
+    const steps = [
+      { key: "level", label: "Start your first level", cta: "Start your first level", desc: "Learn one core idea, then answer a few quick questions to lock it in. Wrong answers just turn red — you keep trying until it clicks." },
+      { key: "review", label: "Review what you miss", desc: "The Review tab quietly collects any question you get wrong, so you can come back and strengthen weak spots later." },
+      { key: "library", label: "Open the Library", desc: "Every Jain concept lives in the Library — a calm reference you can browse anytime, even before you reach that lesson." },
+      { key: "progress", label: "Track your Progress", desc: "Earn XP and coins as you learn, climb learner levels, and spend coins on avatar styles on your starry Progress page." },
+      { key: "climb", label: "Keep climbing the path", desc: "Finishing a level unlocks the next one. Tap the “☰ Levels” button at the top any time to jump around the whole course." }
+    ];
+
+    const canFinish = step1Done;
+    const intro = state.progress.profileName ? `Welcome, ${state.progress.profileName}` : "Welcome";
+
+    root.innerHTML = `
+      <div class="guide">
+        <header class="guide-head">
+          <p class="eyebrow">${intro}</p>
+          <h2>Your first climb</h2>
+          <p class="guide-sub">Take it one step at a time. Start with your first level, then we’ll show you around the app. Each step lights up as you finish it.</p>
+        </header>
+        <ol class="staircase">
+          ${steps.map((step, index) => renderGuideStep(step, index, step1Done)).join("")}
+        </ol>
+        <div class="guide-actions">
+          <button class="primary-btn" id="guideDoneButton" type="button" ${canFinish ? "" : "disabled"}>
+            ${canFinish ? "Done with the steps" : "Finish your first level to continue"}
+          </button>
+        </div>
+      </div>
+    `;
+
+    const startBtn = root.querySelector("#guideStartLevel");
+    if (startBtn) startBtn.addEventListener("click", () => {
+      state.guideLessonActive = true;
+      startLesson(firstLesson.id);
+    });
+
+    root.querySelectorAll("[data-guide-step]").forEach((stepButton) => {
+      stepButton.addEventListener("click", () => {
+        const key = stepButton.dataset.guideStep;
+        if (state.guideRead.has(key)) state.guideRead.delete(key);
+        else state.guideRead.add(key);
+        renderGuide(root);
+      });
+    });
+
+    const doneBtn = root.querySelector("#guideDoneButton");
+    if (doneBtn) doneBtn.addEventListener("click", () => {
+      state.progress.onboarded = true;
+      saveProgressState();
+      state.guideLessonActive = false;
+      state.currentLessonId = getFirstAvailableLesson().id;
+      state.phase = "teach";
+      state.teachingIndex = 0;
+      state.exerciseIndex = 0;
+      setView("learn");
+      renderLesson();
+      renderStats();
+      renderPath();
+    });
+  }
+
+  function renderGuideStep(step, index, step1Done) {
+    if (index === 0) {
+      const done = step1Done;
+      return `
+        <li class="stair ${done ? "is-done" : "is-active"}" style="--stair: ${index};">
+          <div class="stair-orb">${done ? "✓" : index + 1}</div>
+          <div class="stair-card">
+            <p class="eyebrow">Step ${index + 1}</p>
+            <h3>${step.label}</h3>
+            <p>${step.desc}</p>
+            <button class="primary-btn" id="guideStartLevel" type="button">${done ? "Replay first level" : step.cta}</button>
+          </div>
+        </li>
+      `;
+    }
+    const locked = !step1Done;
+    const read = state.guideRead.has(step.key);
+    return `
+      <li class="stair ${read ? "is-done" : ""} ${locked ? "is-locked" : ""}" style="--stair: ${index};">
+        <div class="stair-orb">${read ? "✓" : index + 1}</div>
+        <button class="stair-card stair-toggle" type="button" data-guide-step="${step.key}" ${locked ? "disabled" : ""} aria-expanded="${read}">
+          <p class="eyebrow">Step ${index + 1}</p>
+          <h3>${step.label}</h3>
+          ${read ? `<p>${step.desc}</p>` : `<span class="stair-hint">${locked ? "Finish your first level to unlock" : "Tap to read"}</span>`}
+        </button>
+      </li>
+    `;
+  }
+
   function renderLesson() {
+    document.body.classList.toggle("guide-active", shouldShowGuide());
+    if (shouldShowGuide()) {
+      if (els.guide) renderGuide(els.guide);
+      els.lesson.innerHTML = "";
+      return;
+    }
+    if (els.guide) els.guide.innerHTML = "";
     resetInteractionState();
     const lesson = getLesson(state.currentLessonId);
     if (!lesson) return;
@@ -1890,17 +2067,16 @@ function escapeAttr(value) {
         <div class="progress-bar" role="progressbar" aria-label="Lesson progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}" aria-valuetext="Practice ${state.exerciseIndex + 1} of ${lesson.exercises.length}">
           <div class="progress-fill" style="--progress: ${progress}%"></div>
         </div>
-        <div class="lesson-visual">
-          <div class="flat-illustration" aria-hidden="true"></div>
-          <div>
-            <p class="eyebrow">${lesson.concept}</p>
-            <h2>${lesson.title}</h2>
-            <p>${lesson.summary}</p>
-            <div class="lesson-meta">
-              <span class="meta-pill">${lesson.level}</span>
-              <span class="meta-pill">Practice ${state.exerciseIndex + 1} of ${lesson.exercises.length}</span>
-              <span class="meta-pill">${getUnitTitle(lesson.id)}</span>
-            </div>
+        <div class="lesson-head">
+          <div class="lesson-head-top">
+            <span class="lesson-tag is-practice">Practice</span>
+            <span class="lesson-stepcount">Question ${state.exerciseIndex + 1} of ${lesson.exercises.length}</span>
+          </div>
+          <h2>${lesson.title}</h2>
+          <p class="lesson-lead">${lesson.summary}</p>
+          <div class="lesson-meta">
+            <span class="meta-pill">${lesson.level}</span>
+            <span class="meta-pill">${lesson.concept}</span>
           </div>
         </div>
         <div class="question">
@@ -1930,17 +2106,16 @@ function escapeAttr(value) {
         <div class="progress-bar" role="progressbar" aria-label="Lesson progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}" aria-valuetext="Teaching card ${state.teachingIndex + 1} of ${lesson.teaching.length}">
           <div class="progress-fill" style="--progress: ${progress}%"></div>
         </div>
-        <div class="lesson-visual">
-          <div class="flat-illustration" aria-hidden="true"></div>
-          <div>
-            <p class="eyebrow">Learn first</p>
-            <h2>${lesson.title}</h2>
-            <p>${lesson.summary}</p>
-            <div class="lesson-meta">
-              <span class="meta-pill">${lesson.level}</span>
-              <span class="meta-pill">Card ${state.teachingIndex + 1} of ${lesson.teaching.length}</span>
-              <span class="meta-pill">${lesson.concept}</span>
-            </div>
+        <div class="lesson-head">
+          <div class="lesson-head-top">
+            <span class="lesson-tag">Learn</span>
+            <span class="lesson-stepcount">Card ${state.teachingIndex + 1} of ${lesson.teaching.length}</span>
+          </div>
+          <h2>${lesson.title}</h2>
+          <p class="lesson-lead">${lesson.summary}</p>
+          <div class="lesson-meta">
+            <span class="meta-pill">${lesson.level}</span>
+            <span class="meta-pill">${lesson.concept}</span>
           </div>
         </div>
         ${state.teachingIndex === 0 ? renderObjectives(lesson) : ""}
@@ -1990,6 +2165,7 @@ function escapeAttr(value) {
       body.innerHTML = `<div class="choices">${options.map((option) => `<button class="choice" type="button" aria-pressed="false">${option}</button>`).join("")}</div>`;
       body.querySelectorAll(".choice").forEach((button) => {
         button.addEventListener("click", () => {
+          clearAnswerFeedback();
           state.selected = button.textContent;
           body.querySelectorAll(".choice").forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
         });
@@ -2000,6 +2176,7 @@ function escapeAttr(value) {
       body.innerHTML = `<div class="chips">${exercise.options.map((option) => `<button class="chip" type="button" aria-pressed="false">${option}</button>`).join("")}</div>`;
       body.querySelectorAll(".chip").forEach((button) => {
         button.addEventListener("click", () => {
+          clearAnswerFeedback();
           const value = button.textContent;
           if (state.selectedSet.has(value)) state.selectedSet.delete(value);
           else state.selectedSet.add(value);
@@ -2069,18 +2246,53 @@ function escapeAttr(value) {
     const exercise = lesson.exercises[state.exerciseIndex];
     const result = grade(exercise);
     const feedback = document.getElementById("feedback");
+    const card = document.querySelector(".exercise-card");
+
+    markChoiceStates(exercise, result.correct);
+
+    if (card) {
+      card.classList.remove("is-correct", "is-wrong");
+      card.classList.add(result.correct ? "is-correct" : "is-wrong");
+    }
     feedback.classList.toggle("is-good", result.correct);
     feedback.classList.toggle("is-bad", !result.correct);
-    feedback.textContent = `${result.correct ? "Correct." : "Try again."} ${exercise.explain}`;
-    els.live.textContent = feedback.textContent;
+    feedback.innerHTML = `<strong>${result.correct ? "✓ Correct!" : "✗ Not quite — try again"}</strong><span>${exercise.explain || (result.correct ? "Well reasoned." : "Re-read the prompt and give it another go.")}</span>`;
+    els.live.textContent = `${result.correct ? "Correct." : "Try again."} ${exercise.explain || ""}`;
     recordResult(lesson.id, result.correct);
 
+    const checkButton = document.getElementById("checkButton");
     if (result.correct) {
-      document.getElementById("checkButton").textContent = "Continue";
-      document.getElementById("checkButton").removeEventListener("click", checkAnswer);
-      document.getElementById("checkButton").addEventListener("click", nextExercise, { once: true });
+      checkButton.textContent = "Continue";
+      checkButton.classList.add("is-correct");
+      checkButton.removeEventListener("click", checkAnswer);
+      checkButton.addEventListener("click", nextExercise, { once: true });
     }
     renderStats();
+  }
+
+  function markChoiceStates(exercise, correct) {
+    const body = document.getElementById("exerciseBody");
+    if (!body) return;
+    if (exercise.type !== "choice" && exercise.type !== "trueFalse" && exercise.type !== "select") return;
+    const selector = exercise.type === "select" ? ".chip" : ".choice";
+    body.querySelectorAll(selector).forEach((btn) => {
+      btn.classList.remove("is-correct", "is-wrong");
+      if (btn.getAttribute("aria-pressed") === "true") {
+        btn.classList.add(correct ? "is-correct" : "is-wrong");
+      }
+    });
+  }
+
+  function clearAnswerFeedback() {
+    const card = document.querySelector(".exercise-card");
+    if (card) card.classList.remove("is-wrong");
+    const feedback = document.getElementById("feedback");
+    if (feedback && feedback.classList.contains("is-bad")) {
+      feedback.classList.remove("is-bad");
+      feedback.textContent = "Choose an answer, then check it.";
+    }
+    const body = document.getElementById("exerciseBody");
+    if (body) body.querySelectorAll(".is-wrong").forEach((el) => el.classList.remove("is-wrong"));
   }
 
   function grade(exercise) {
@@ -2128,6 +2340,7 @@ function escapeAttr(value) {
 
   function renderCompletion(lesson) {
     const next = getNextLesson(lesson.id);
+    const inGuide = state.guideLessonActive;
     const reward = state.lastCompletionReward || { ...getLessonReward(lesson), awarded: false };
     const level = getLearnerLevel();
     els.lesson.innerHTML = `
@@ -2143,12 +2356,17 @@ function escapeAttr(value) {
         </div>
         <div class="lesson-actions">
           <button class="secondary-btn" id="reviewLessonButton" type="button">Practice again</button>
-          <button class="primary-btn" id="nextLessonButton" type="button">${next ? "Next lesson" : "View progress"}</button>
+          <button class="primary-btn" id="nextLessonButton" type="button">${inGuide ? "Back to the steps" : next ? "Next lesson" : "View progress"}</button>
         </div>
       </article>
     `;
     document.getElementById("reviewLessonButton").addEventListener("click", () => startLesson(lesson.id));
     document.getElementById("nextLessonButton").addEventListener("click", () => {
+      if (inGuide) {
+        state.guideLessonActive = false;
+        renderLesson();
+        return;
+      }
       if (next) startLesson(next.id);
       else setView("progress");
     });

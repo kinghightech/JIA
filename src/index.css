@@ -295,6 +295,14 @@ a {
   -webkit-backdrop-filter: none;
 }
 
+.onboarding-entering {
+  margin-top: 1.75rem;
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  color: rgba(255, 255, 255, 0.55);
+  opacity: 0;
+  animation: fade-rise 0.8s ease-out 1.4s forwards;
+}
+
 /* ---- Starfield ---- */
 .stars-layer {
   position: absolute;

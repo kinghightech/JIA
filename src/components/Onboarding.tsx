@@ -143,6 +143,21 @@ export default function Onboarding() {
 
   const displayName = name.trim()
 
+  // Hand the name to the Jainduo app (same origin → shared localStorage),
+  // then redirect into it after the thank-you message has been read.
+  function enterJainduo() {
+    try {
+      const KEY = 'jinaPath.progress.v1'
+      const existing = JSON.parse(localStorage.getItem(KEY) || '{}')
+      localStorage.setItem(KEY, JSON.stringify({ ...existing, profileName: displayName }))
+    } catch {
+      /* localStorage unavailable — proceed without seeding the name */
+    }
+    window.setTimeout(() => {
+      window.location.href = '/jainduo/index.html'
+    }, 1600)
+  }
+
   return (
     <div className="onboarding-root" style={{ backgroundColor: '#013F60' }}>
       <Stars />
@@ -209,7 +224,11 @@ export default function Onboarding() {
                     ? `Thank you, ${displayName} — you’ve completed the onboarding.`
                     : 'Thank you — you’ve completed the onboarding.'
                 }
+                onDone={enterJainduo}
               />
+            </p>
+            <p className="onboarding-entering" style={{ fontFamily: SERIF }}>
+              Entering your journey…
             </p>
           </div>
         )}

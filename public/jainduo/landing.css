@@ -1,0 +1,338 @@
+.landing-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.landing-panel {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 420px);
+  gap: 28px 42px;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  padding: 64px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: var(--bg);
+  box-shadow: none;
+}
+
+.landing-panel::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(90deg, rgba(201, 185, 154, 0.14) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(201, 185, 154, 0.1) 1px, transparent 1px);
+  background-size: 48px 48px;
+  content: "";
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent 72%);
+}
+
+.landing-copy {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 18px;
+  max-width: 640px;
+}
+
+.landing-text {
+  max-width: 560px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.18rem;
+  line-height: 1.55;
+}
+
+.level-strip {
+  display: grid;
+  gap: 10px;
+  max-width: 440px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--mist);
+}
+
+.level-strip > div:first-child {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.level-strip strong {
+  color: var(--teal);
+  font-size: 0.95rem;
+}
+
+.landing-name-form {
+  display: grid;
+  gap: 8px;
+  max-width: 390px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.landing-name-form label {
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.landing-name-form div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.landing-name-form input {
+  min-width: 0;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: #ffffff;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.landing-stats {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  grid-column: 1 / -1;
+}
+
+.landing-stats span {
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--teal);
+  font-size: 0.83rem;
+  font-weight: 800;
+}
+
+.landing-visual {
+  position: relative;
+  z-index: 1;
+  min-height: 360px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--mist);
+  box-shadow: inset 0 -10px 0 rgba(29, 78, 95, 0.1);
+}
+
+.sun-disc {
+  position: absolute;
+  top: 58px;
+  left: calc(50% - 34px);
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: rgba(214, 136, 58, 0.25);
+}
+
+.mountain-range,
+.mountain-range::before,
+.mountain-range::after {
+  position: absolute;
+  bottom: 112px;
+  width: 220px;
+  height: 156px;
+  border: 1px solid rgba(29, 78, 95, 0.14);
+  background: rgba(125, 181, 160, 0.2);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  content: "";
+}
+
+.mountain-range {
+  left: calc(50% - 110px);
+}
+
+.mountain-range::before {
+  left: -120px;
+  bottom: -2px;
+  transform: scale(0.75);
+  transform-origin: bottom;
+}
+
+.mountain-range::after {
+  right: -126px;
+  bottom: -2px;
+  transform: scale(0.68);
+  transform-origin: bottom;
+}
+
+.water-rings {
+  position: absolute;
+  right: 42px;
+  bottom: 26px;
+  left: 42px;
+  height: 118px;
+  border: 1px solid rgba(29, 78, 95, 0.18);
+  border-radius: 50%;
+  background:
+    repeating-radial-gradient(ellipse at center, transparent 0 20px, rgba(29, 78, 95, 0.15) 21px 22px),
+    rgba(245, 240, 232, 0.62);
+}
+
+.phone-card-demo {
+  position: absolute;
+  right: 26px;
+  bottom: 34px;
+  display: grid;
+  gap: 7px;
+  width: min(210px, calc(100% - 52px));
+  padding: 16px;
+  border: 1px solid rgba(29, 78, 95, 0.32);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.phone-card-demo span {
+  color: var(--purple);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.phone-card-demo strong {
+  color: var(--teal);
+}
+
+.phone-card-demo small {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.path-dots {
+  position: absolute;
+  top: 122px;
+  right: 50px;
+  left: 50px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.path-dots i {
+  width: 18px;
+  height: 18px;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 0 1px var(--sand);
+}
+
+.journey-card {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr) minmax(230px, 320px);
+  gap: 18px;
+  align-items: center;
+  grid-column: 1 / -1;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.journey-scene {
+  position: relative;
+  min-height: 124px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--mist);
+}
+
+.journey-scene::before {
+  position: absolute;
+  inset: 18px 16px 30px;
+  border-bottom: 4px solid rgba(29, 78, 95, 0.22);
+  border-radius: 50%;
+  content: "";
+}
+
+.journey-scene span {
+  position: absolute;
+  right: 30px;
+  bottom: 32px;
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--teal);
+  border-radius: 50%;
+  background: rgba(214, 136, 58, 0.22);
+}
+
+.journey-scene i {
+  position: absolute;
+  bottom: 20px;
+  left: 34px;
+  width: 36px;
+  height: 64px;
+  border: 2px solid var(--teal);
+  border-radius: 999px 999px 12px 12px;
+  background: var(--sage);
+}
+
+.journey-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.journey-copy p,
+.journey-options small {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.journey-copy .feedback {
+  display: grid;
+  gap: 3px;
+  min-height: 0;
+  padding: 10px;
+}
+
+.journey-options {
+  display: grid;
+  gap: 10px;
+}
+
+@media (max-width: 640px) {
+  .landing-panel {
+    grid-template-columns: 1fr;
+    min-height: 100vh;
+    padding: 28px 18px 96px;
+  }
+
+  .landing-name-form div {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-visual {
+    min-height: 300px;
+  }
+
+  .journey-card {
+    grid-template-columns: 1fr;
+  }
+
+  .journey-scene {
+    min-height: 98px;
+  }
+}

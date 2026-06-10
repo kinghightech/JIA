@@ -16,7 +16,7 @@ function App() {
         <header className="mx-auto w-full max-w-7xl px-8 py-6">
           <nav className="flex items-center justify-between gap-6">
             <a href="#top" className="flex items-center gap-3 text-3xl tracking-tight text-foreground" style={{ fontFamily: "'Instrument Serif', serif" }}>
-              <img src="/src/assets/logo.svg" alt="AnuravtGo logo" width={40} height={40} className="inline-block" />
+              <img src="/src/assets/logo.png" alt="AnuravtGo logo" width={40} height={40} className="inline-block" />
               <span className="leading-none">AnuravtGo</span>
             </a>
 

@@ -60,6 +60,14 @@ a {
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
   position: relative;
   overflow: hidden;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.hero-cta.liquid-glass:hover {
+  background: #d4a017 !important;
+  color: #000 !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .liquid-glass::before {

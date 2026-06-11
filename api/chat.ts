@@ -1,26 +1,24 @@
-import { NextRequest, NextResponse } from 'next/server';
-
 export const config = {
   runtime: 'edge',
 };
 
-export default async function handler(req: NextRequest) {
+export default async (request: Request) => {
   // Only accept POST requests
-  if (req.method !== 'POST') {
-    return NextResponse.json(
-      { error: 'Method not allowed' },
-      { status: 405 }
+  if (request.method !== 'POST') {
+    return new Response(
+      JSON.stringify({ error: 'Method not allowed' }),
+      { status: 405, headers: { 'Content-Type': 'application/json' } }
     );
   }
 
   try {
-    const { messages, model } = await req.json();
+    const { messages, model } = await request.json();
 
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
-      return NextResponse.json(
-        { error: 'API key not configured' },
-        { status: 500 }
+      return new Response(
+        JSON.stringify({ error: 'API key not configured' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
@@ -30,7 +28,7 @@ export default async function handler(req: NextRequest) {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
-        'HTTP-Referer': req.headers.get('origin') || 'https://anuvratgo.vercel.app',
+        'HTTP-Referer': request.headers.get('origin') || 'https://jia-qx958rvcs-kinghightechs-projects.vercel.app',
         'X-Title': 'AnuvratGo',
       },
       body: JSON.stringify({
@@ -42,8 +40,10 @@ export default async function handler(req: NextRequest) {
     const data = await response.json();
 
     // Add CORS headers
-    return NextResponse.json(data, {
+    return new Response(JSON.stringify(data), {
+      status: response.status,
       headers: {
+        'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST',
         'Access-Control-Allow-Headers': 'Content-Type',
@@ -51,9 +51,9 @@ export default async function handler(req: NextRequest) {
     });
   } catch (error) {
     console.error('Chat API error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+    return new Response(
+      JSON.stringify({ error: 'Internal server error', details: String(error) }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
-}
+};

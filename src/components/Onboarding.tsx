@@ -166,7 +166,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
           <div key="intro" className="onboarding-screen">
             <p className="onboarding-line" style={{ fontFamily: SERIF }}>
               <Typewriter
-                text="We are AnuravtGo — your way of understanding Jainism."
+                text="We are AnuvratGo — your way of understanding Jainism."
                 onDone={() => setIntroReady(true)}
               />
             </p>

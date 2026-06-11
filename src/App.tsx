@@ -51,8 +51,8 @@ function App() {
           <div ref={headerRef} className="mx-auto w-full max-w-7xl px-8 py-8 pt-10">
             <nav className="flex items-center justify-between gap-6">
               <a href="#top" className="flex items-center gap-3 text-3xl tracking-tight text-foreground" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                <img src={logo} alt="AnuravtGo logo" width={52} height={52} className="inline-block" />
-                <span className="leading-none">AnuravtGo</span>
+                <img src={logo} alt="AnuvratGo logo" width={52} height={52} className="inline-block" />
+                <span className="leading-none">AnuvratGo</span>
               </a>
             </nav>
           </div>
@@ -85,7 +85,7 @@ function App() {
 
       {phase === 'jainduo' && (
         <iframe
-          title="AnuravtGo"
+          title="AnuvratGo"
           src="/jainduo/index.html"
           className="jainduo-frame onboarding-enter"
         />

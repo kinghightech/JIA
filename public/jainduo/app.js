@@ -3,15 +3,13 @@ import { renderLibraryView, renderProgressView, renderReviewView } from "./dashb
 import { getDefaultProgress, loadProgress, saveProgress } from "./storage.js";
 
 /* ============================================================================
- * AI TUTOR (OpenRouter) — PASTE YOUR API KEY BELOW
- * 1. Get a key at https://openrouter.ai/keys
- * 2. Paste it between the quotes on the OPENROUTER_API_KEY line.
+ * AI TUTOR (OpenRouter) — API KEY FROM ENVIRONMENT
  * ========================================================================== */
-const OPENROUTER_API_KEY = ""; // <-- paste your OpenRouter key here, e.g. "sk-or-v1-..."
+const OPENROUTER_API_KEY = globalThis.__VITE_OPENROUTER_API_KEY__ || (typeof window !== 'undefined' && window.__OPENROUTER_API_KEY__) || '';
 const OPENROUTER_MODEL = "ibm-granite/granite-4.1-8b";
 
 const TUTOR_SYSTEM_PROMPT = [
-  "You are the AnuravtGo Tutor, a warm, patient guide inside a Jainism learning app.",
+  "You are the AnuvratGo Tutor, a warm, patient guide inside a Jainism learning app.",
   "Your ONLY subject is Jainism. That includes: ahimsa (non-violence), anekantavada (many-sidedness), syadvada, aparigraha (non-attachment), asteya, satya, brahmacharya; the Tirthankaras (e.g. Rishabhanatha, Parshvanatha, Mahavira); jiva and ajiva; karma and the path to moksha (liberation); the three jewels (right faith, knowledge, conduct); Jain ethics, vows, and daily practice; Jain history, the Digambara and Svetambara traditions, the Agamas and other texts; Jain cosmology, festivals (e.g. Paryushana, Mahavir Jayanti), pilgrimage sites, terminology, and the lessons in this course.",
   "GUARDRAILS — follow strictly:",
   "1. If a question is not about Jainism, do NOT answer it. Politely decline in one short sentence and steer back, e.g. 'I can only help with Jainism — try asking about ahimsa, karma, the Tirthankaras, or anything from your lessons.'",
@@ -22,7 +20,7 @@ const TUTOR_SYSTEM_PROMPT = [
   "If the learner just greets you, welcome them and invite a Jainism question."
 ].join("\n");
 
-const TUTOR_GREETING = "Namaste! I'm your AnuravtGo tutor. Ask me anything about Jainism — ahimsa, karma, the Tirthankaras, the path to moksha, or anything from your lessons.";
+const TUTOR_GREETING = "Namaste! I'm your AnuvratGo tutor. Ask me anything about Jainism — ahimsa, karma, the Tirthankaras, the path to moksha, or anything from your lessons.";
 
 (function () {
   const levelNames = [
@@ -173,7 +171,7 @@ const TUTOR_GREETING = "Namaste! I'm your AnuravtGo tutor. Ask me anything about
       sendChat(text);
     });
     els.reset.addEventListener("click", () => {
-      if (confirm("Reset all local progress for AnuravtGo?")) {
+      if (confirm("Reset all local progress for AnuvratGo?")) {
         state.progress = getDefaultProgress(getLessons());
         saveProgressState();
         state.currentLessonId = getFirstAvailableLesson().id;
@@ -259,7 +257,7 @@ const TUTOR_GREETING = "Namaste! I'm your AnuravtGo tutor. Ask me anything about
           "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
           "HTTP-Referer": location.origin,
-          "X-Title": "AnuravtGo"
+          "X-Title": "AnuvratGo"
         },
         body: JSON.stringify({
           model: OPENROUTER_MODEL,

@@ -237,84 +237,37 @@ const TUTOR_GREETING = "Namaste! I'm your AnuvratGo tutor. Ask me anything about
     state.chatLoading = true;
     renderChatLog();
 
-    if (!OPENROUTER_API_KEY) {
-      state.chatLoading = false;
-      state.chat.push({
-        role: "assistant",
-        content: "⚠️ The tutor isn’t connected yet. Add your OpenRouter API key near the top of public/jainduo/app.bundle.js (the OPENROUTER_API_KEY line) to enable me."
-      });
-      renderChatLog();
-      return;
-    }
-
-    const assistant = { role: "assistant", content: "" };
-    let started = false;
-
     try {
-      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
-          "HTTP-Referer": location.origin,
-          "X-Title": "AnuvratGo"
         },
         body: JSON.stringify({
           model: OPENROUTER_MODEL,
-          stream: true,
-          max_tokens: 700,
           messages: [{ role: "system", content: TUTOR_SYSTEM_PROMPT }, ...state.chat]
         })
       });
-      if (!response.ok || !response.body) throw new Error("HTTP " + response.status);
-
-      // Stream tokens in as they arrive so replies feel instant.
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || "";
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed.startsWith("data:")) continue; // skip blank lines and ': keep-alive' comments
-          const payload = trimmed.slice(5).trim();
-          if (payload === "[DONE]") continue;
-          try {
-            const delta = JSON.parse(payload).choices?.[0]?.delta?.content;
-            if (delta) {
-              if (!started) {
-                started = true;
-                state.chatLoading = false;
-                state.chat.push(assistant);
-              }
-              assistant.content += delta;
-              renderChatLog();
-            }
-          } catch {
-            /* partial JSON across chunks — wait for more */
-          }
-        }
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "HTTP " + response.status);
       }
 
-      if (!started) {
-        state.chatLoading = false;
-        state.chat.push({ role: "assistant", content: "Sorry, I couldn’t form a reply just now. Please try again." });
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error);
       }
+      
+      const content = data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
+      state.chat.push({ role: "assistant", content });
+      state.chatLoading = false;
     } catch (error) {
       state.chatLoading = false;
-      if (started) {
-        assistant.content += "\n\n⚠️ (connection interrupted)";
-      } else {
-        state.chat.push({
-          role: "assistant",
-          content: "⚠️ I couldn’t reach the tutor service. Check the API key and your connection, then try again."
-        });
-      }
+      state.chat.push({
+        role: "assistant",
+        content: "⚠️ I couldn't reach the tutor service. " + (error.message || "Check your connection and try again.")
+      });
     } finally {
       state.chatLoading = false;
       renderChatLog();

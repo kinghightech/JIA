@@ -1915,6 +1915,9 @@ function escapeAttr(value) {
     state.chatLoading = true;
     renderChatLog();
 
+    const assistant = { role: "assistant", content: "" };
+    let started = false;
+
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
@@ -1927,25 +1930,60 @@ function escapeAttr(value) {
         })
       });
       
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "HTTP " + response.status);
+      if (!response.ok || !response.body) {
+        throw new Error("HTTP " + response.status);
       }
 
-      const data = await response.json();
-      if (data.error) {
-        throw new Error(data.error);
+      // Stream tokens in as they arrive
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("
+");
+        buffer = lines.pop() || "";
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith("data:")) continue;
+          const payload = trimmed.slice(5).trim();
+          if (payload === "[DONE]") continue;
+          try {
+            const delta = JSON.parse(payload).choices?.[0]?.delta?.content;
+            if (delta) {
+              if (!started) {
+                started = true;
+                state.chatLoading = false;
+                state.chat.push(assistant);
+              }
+              assistant.content += delta;
+              renderChatLog();
+            }
+          } catch {
+            /* partial JSON */
+          }
+        }
       }
-      
-      const content = data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
-      state.chat.push({ role: "assistant", content });
-      state.chatLoading = false;
+
+      if (!started) {
+        state.chatLoading = false;
+        state.chat.push({ role: "assistant", content: "Sorry, I couldn't form a reply. Try again." });
+      }
     } catch (error) {
       state.chatLoading = false;
-      state.chat.push({
-        role: "assistant",
-        content: "⚠️ I couldn't reach the tutor service. " + (error.message || "Check your connection and try again.")
-      });
+      if (started) {
+        assistant.content += "
+
+⚠️ (connection interrupted)";
+      } else {
+        state.chat.push({
+          role: "assistant",
+          content: "⚠️ I couldn't reach the tutor service. " + (error.message || "Check your connection.")
+        });
+      }
     } finally {
       state.chatLoading = false;
       renderChatLog();

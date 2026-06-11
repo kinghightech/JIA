@@ -22,31 +22,44 @@ export default async (request: Request) => {
       );
     }
 
-    // Forward the request to OpenRouter
+    // Forward the request to OpenRouter with streaming
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
-        'HTTP-Referer': request.headers.get('origin') || 'https://jia-qx958rvcs-kinghightechs-projects.vercel.app',
+        'HTTP-Referer': request.headers.get('origin') || 'https://anuvratgo.com',
         'X-Title': 'AnuvratGo',
       },
       body: JSON.stringify({
         model: model || 'ibm-granite/granite-4.1-8b',
+        stream: true,
+        max_tokens: 700,
         messages,
       }),
     });
 
-    const data = await response.json();
+    if (!response.ok) {
+      const error = await response.text();
+      return new Response(
+        JSON.stringify({ error: `OpenRouter error: ${error}` }),
+        { status: response.status, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
-    // Add CORS headers
-    return new Response(JSON.stringify(data), {
-      status: response.status,
+    // Pass through the streaming response with CORS headers
+    const { readable, writable } = new TransformStream();
+    
+    response.body?.pipeTo(writable).catch(err => console.error('Stream error:', err));
+
+    return new Response(readable, {
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'text/event-stream',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST',
         'Access-Control-Allow-Headers': 'Content-Type',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
       },
     });
   } catch (error) {

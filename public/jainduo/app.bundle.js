@@ -1802,10 +1802,29 @@ function escapeAttr(value) {
   };
 
   function init() {
+    mountAppStars();
     state.currentLessonId = getFirstAvailableLesson().id;
     bindShell();
     render();
     setView("learn");
+  }
+
+  function mountAppStars() {
+    if (document.querySelector(".app-stars")) return;
+    const layer = document.createElement("div");
+    layer.className = "app-stars";
+    layer.setAttribute("aria-hidden", "true");
+    let dots = "";
+    for (let i = 0; i < 150; i += 1) {
+      const top = (Math.random() * 100).toFixed(2);
+      const left = (Math.random() * 100).toFixed(2);
+      const size = (Math.random() * 2 + 1).toFixed(2);
+      const delay = (Math.random() * 6).toFixed(2);
+      const duration = (Math.random() * 3.5 + 2.5).toFixed(2);
+      dots += `<span class="p-star" style="top:${top}%;left:${left}%;width:${size}px;height:${size}px;animation-delay:${delay}s;animation-duration:${duration}s"></span>`;
+    }
+    layer.innerHTML = dots;
+    document.body.appendChild(layer);
   }
 
   function bindShell() {
@@ -1886,7 +1905,7 @@ function escapeAttr(value) {
     if (!els.chatLog) return;
     const greeting = `<div class="chat-msg is-bot"><div class="chat-bubble">${escapeChat(TUTOR_GREETING)}</div></div>`;
     const messages = state.chat
-      .map((m) => `<div class="chat-msg ${m.role === "user" ? "is-user" : "is-bot"}"><div class="chat-bubble">${escapeChat(m.content)}</div></div>`)
+      .map((m) => `<div class="chat-msg ${m.role === "user" ? "is-user" : "is-bot"}"><div class="chat-bubble">${m.role === "user" ? escapeChat(m.content) : renderMarkdown(m.content)}</div></div>`)
       .join("");
     const typing = state.chatLoading
       ? `<div class="chat-msg is-bot"><div class="chat-bubble chat-typing"><span></span><span></span><span></span></div></div>`
@@ -1990,6 +2009,33 @@ function escapeAttr(value) {
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/\n/g, "<br>");
+  }
+
+  // Lightweight Markdown -> HTML for the tutor's replies (escapes first, so it's safe).
+  function renderMarkdown(src) {
+    const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const inline = (t) => esc(t)
+      .replace(/`([^`]+)`/g, "<code>$1</code>")
+      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+      .replace(/__([^_]+)__/g, "<strong>$1</strong>")
+      .replace(/(^|[^*])\*([^*\s][^*]*?)\*/g, "$1<em>$2</em>")
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    const lines = String(src).replace(/\r/g, "").split("\n");
+    let html = "";
+    let list = null;
+    const closeList = () => { if (list) { html += "</" + list + ">"; list = null; } };
+    for (const raw of lines) {
+      const line = raw.replace(/\s+$/, "");
+      let m;
+      if (!line.trim()) { closeList(); continue; }
+      if ((m = line.match(/^#{1,6}\s+(.*)$/))) { closeList(); html += "<h4>" + inline(m[1]) + "</h4>"; continue; }
+      if ((m = line.match(/^\s*[-*+]\s+(.*)$/))) { if (list !== "ul") { closeList(); list = "ul"; html += "<ul>"; } html += "<li>" + inline(m[1]) + "</li>"; continue; }
+      if ((m = line.match(/^\s*\d+\.\s+(.*)$/))) { if (list !== "ol") { closeList(); list = "ol"; html += "<ol>"; } html += "<li>" + inline(m[1]) + "</li>"; continue; }
+      closeList();
+      html += "<p>" + inline(line) + "</p>";
+    }
+    closeList();
+    return html;
   }
 
   function render() {

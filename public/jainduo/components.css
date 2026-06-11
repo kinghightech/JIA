@@ -999,3 +999,290 @@ button.stair-card:disabled {
   0%, 100% { opacity: 0.3; }
   50% { opacity: 1; }
 }
+
+/* ==================================================================== */
+/* DEEP-BLUE THEME — matches the landing + onboarding for one coherent  */
+/* look across the whole app (starry #013F60, serif headings, gold).    */
+/* ==================================================================== */
+:root {
+  --bg: #013f60;
+  --surface: rgba(255, 255, 255, 0.08);
+  --surface-2: rgba(255, 255, 255, 0.06);
+  --mist: rgba(255, 255, 255, 0.08);
+  --ink: #eef5fb;
+  --muted: rgba(223, 237, 247, 0.72);
+  --line: rgba(255, 255, 255, 0.16);
+  --line-strong: rgba(255, 255, 255, 0.32);
+  --teal: #0f6391;
+  --teal-dark: #093953;
+  --gold: #ffd166;
+  --sage: #5ec98a;
+}
+
+body {
+  background: #013f60;
+  color: var(--ink);
+}
+
+/* Global starfield behind everything (built once in JS) */
+.app-stars {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.p-star {
+  position: absolute;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.7);
+  animation-name: p-twinkle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.app-shell {
+  position: relative;
+  z-index: 1;
+}
+
+/* The per-page progress stars are replaced by the global field */
+.progress-stars { display: none; }
+
+/* Serif, light headings everywhere (like the landing/onboarding) */
+h1, h2, h3,
+.brand strong,
+.lesson-head h2,
+.guide-head h2,
+.chat-bubble h4 {
+  font-family: 'Instrument Serif', serif;
+  font-weight: 400;
+  color: #ffffff;
+}
+
+.eyebrow { color: var(--gold); }
+.node-kicker { color: var(--gold); }
+
+/* Sidebar + panels as glass on the starry blue */
+.sidebar {
+  background: rgba(1, 26, 43, 0.5);
+  border-right-color: var(--line);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.brand-mark {
+  border-color: var(--gold);
+  background: rgba(255, 209, 102, 0.16);
+  color: var(--gold);
+  box-shadow: none;
+}
+
+.path-panel,
+.lesson-panel,
+.content-panel {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--line);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.38);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.path-panel { background: rgba(1, 26, 43, 0.82); }
+
+.info-card,
+.teach-card,
+.objective-list,
+.lesson-head,
+.question,
+.completion,
+.reward-shop,
+.reward-card,
+.feedback,
+.node-card,
+.stair-card {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.info-card p,
+.teach-card p,
+.objective-list li,
+.misconception-list li,
+.model-box span,
+.reward-card p,
+.stair-card p,
+.node-card span,
+.guide-sub,
+.stair-hint,
+.lesson-lead {
+  color: var(--muted);
+}
+
+.model-box {
+  background: rgba(255, 209, 102, 0.1);
+  border-color: rgba(255, 209, 102, 0.3);
+}
+
+.misconception-list {
+  background: rgba(224, 49, 49, 0.1);
+  border-color: rgba(224, 49, 49, 0.3);
+}
+
+/* Buttons + choices */
+.primary-btn,
+.secondary-btn,
+.choice,
+.chip,
+.small-btn {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ink);
+  border-color: var(--line-strong);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35);
+}
+
+.primary-btn {
+  background: var(--gold);
+  color: #20180a;
+  border-color: #d9ad34;
+  box-shadow: 0 5px 0 #bb9320;
+}
+
+.secondary-btn:hover,
+.small-btn:hover,
+.choice:hover,
+.chip:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: var(--gold);
+}
+
+.choice[aria-pressed="true"],
+.chip[aria-pressed="true"] {
+  background: rgba(255, 209, 102, 0.18);
+  border-color: var(--gold);
+  color: #ffffff;
+}
+
+.chip.is-matched { background: rgba(94, 201, 138, 0.2); color: #d8ffe2; }
+
+/* Right = green, wrong = red (tuned for the dark bg) */
+.choice.is-correct,
+.chip.is-correct {
+  background: rgba(55, 178, 77, 0.22);
+  border-color: var(--correct);
+  color: #d8ffe2;
+}
+
+.choice.is-wrong,
+.chip.is-wrong {
+  background: rgba(224, 49, 49, 0.2);
+  border-color: var(--wrong);
+  color: #ffdede;
+}
+
+.feedback { color: var(--ink); }
+.feedback.is-good { background: rgba(55, 178, 77, 0.16); border-color: var(--correct); color: #d8ffe2; }
+.feedback.is-good strong { color: #7ef0a0; }
+.feedback.is-bad { background: rgba(224, 49, 49, 0.16); border-color: var(--wrong); color: #ffdede; }
+.feedback.is-bad strong { color: #ff9a9a; }
+
+/* Inputs */
+.text-answer,
+.chat-input,
+.avatar-name-form input {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-color: var(--line-strong);
+}
+
+.text-answer::placeholder,
+.chat-input::placeholder,
+.avatar-name-form input::placeholder { color: rgba(255, 255, 255, 0.5); }
+
+.chat-input:focus { border-color: var(--gold); }
+
+/* Nav */
+.nav-item { color: var(--ink); }
+.nav-item strong { color: var(--ink); }
+.nav-item span { background: rgba(255, 255, 255, 0.08); border-color: var(--line); color: var(--gold); }
+.nav-item:hover,
+.nav-item.is-active { background: rgba(255, 209, 102, 0.16); border-color: var(--gold); color: #ffffff; }
+.nav-item.is-active span { background: var(--gold); color: #20180a; }
+
+/* Profile stats */
+.profile-card { background: rgba(255, 255, 255, 0.05); border-color: var(--line); }
+.profile-card div { background: rgba(255, 255, 255, 0.05); border-color: var(--line); }
+.profile-card strong { color: #ffffff; }
+.stat-label, .brand small { color: var(--muted); }
+
+/* Course path */
+.node-orb { background: rgba(255, 255, 255, 0.1); border-color: var(--line-strong); color: #ffffff; box-shadow: 0 5px 0 rgba(0, 0, 0, 0.35); }
+.lesson-node.is-current .node-orb { background: var(--gold); color: #20180a; border-color: #d9ad34; }
+.lesson-node.is-complete .node-orb { background: rgba(94, 201, 138, 0.32); }
+.lesson-node.is-locked .node-orb { background: rgba(255, 255, 255, 0.05); color: var(--muted); box-shadow: none; }
+.course-path::before { background: rgba(255, 255, 255, 0.18); }
+
+/* Meters + progress bars */
+.meter, .progress-bar { background: rgba(255, 255, 255, 0.12); border-color: var(--line-strong); }
+.meter span, .progress-fill { background: var(--gold); }
+
+/* Pills / badges / tags */
+.badge { background: rgba(255, 209, 102, 0.16); border-color: rgba(255, 209, 102, 0.4); color: var(--gold); }
+.meta-pill { background: rgba(255, 255, 255, 0.08); border-color: var(--line); color: var(--muted); }
+.accuracy-pill { background: rgba(224, 49, 49, 0.18); border-color: rgba(224, 49, 49, 0.45); color: #ff9a9a; }
+.lesson-tag { background: var(--gold); color: #20180a; }
+.lesson-tag.is-practice { background: #ffb454; color: #2a1705; }
+.lesson-stepcount { color: var(--muted); }
+
+/* Completion + rewards + avatar */
+.completion-medal { border-color: var(--gold); background: rgba(255, 209, 102, 0.2); color: var(--gold); }
+.completion-rewards span { background: rgba(255, 255, 255, 0.08); border-color: var(--line); color: var(--gold); }
+.avatar-face { background: rgba(255, 255, 255, 0.12); border-color: var(--line-strong); color: #ffffff; }
+.reward-shop { background: rgba(255, 255, 255, 0.05); }
+.reward-swatch { border-color: var(--line-strong); }
+.shop-heading strong { background: rgba(255, 255, 255, 0.08); border-color: var(--line); color: var(--gold); }
+.reward-card.is-equipped { border-color: var(--gold); background: rgba(255, 209, 102, 0.12); }
+
+/* Staircase guide */
+.stair-orb { background: rgba(255, 255, 255, 0.1); border-color: var(--line-strong); color: #ffffff; box-shadow: 0 5px 0 rgba(0, 0, 0, 0.35); }
+.stair.is-active .stair-orb { background: var(--gold); color: #20180a; border-color: #d9ad34; }
+.stair.is-done .stair-orb { background: var(--correct); border-color: var(--correct-strong); color: #fff; box-shadow: 0 5px 0 var(--correct-strong); }
+.stair.is-locked .stair-orb { background: rgba(255, 255, 255, 0.05); color: var(--muted); box-shadow: none; }
+button.stair-card:hover:not(:disabled) { background: rgba(255, 255, 255, 0.12); border-color: var(--gold); }
+.stair.is-done .stair-card { border-color: var(--correct); }
+.review-empty { background: rgba(255, 255, 255, 0.06); }
+.review-empty-mark { background: rgba(255, 255, 255, 0.1); border-color: var(--correct); color: #7ef0a0; }
+
+/* The first-run guide fills the screen — no surrounding box */
+body.guide-active .lesson-panel {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  padding: 0;
+  width: min(920px, 100%);
+}
+
+/* Chat bubbles + markdown */
+.chat-msg.is-bot .chat-bubble { background: rgba(255, 255, 255, 0.08); border-color: var(--line); color: var(--ink); }
+.chat-msg.is-user .chat-bubble { background: var(--gold); color: #20180a; border-color: #d9ad34; }
+.chat-bubble h4 { margin: 2px 0 6px; font-size: 1.1rem; }
+.chat-bubble p { margin: 0 0 8px; }
+.chat-bubble p:last-child { margin-bottom: 0; }
+.chat-bubble ul, .chat-bubble ol { margin: 4px 0 8px; padding-left: 20px; }
+.chat-bubble li { margin: 3px 0; }
+.chat-bubble code { background: rgba(0, 0, 0, 0.32); padding: 1px 5px; border-radius: 4px; font-size: 0.9em; }
+.chat-bubble a { color: #ffe08a; text-decoration: underline; }
+.chat-msg.is-user .chat-bubble a,
+.chat-msg.is-user .chat-bubble code { color: #20180a; }
+
+@media (max-width: 640px) {
+  .sidebar { background: rgba(1, 22, 36, 0.94); }
+}
+
+/* Progress panel joins the glass treatment (global stars show through) */
+.content-panel[data-panel="progress"] { background: rgba(255, 255, 255, 0.06); }
